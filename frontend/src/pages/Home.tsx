@@ -1,19 +1,21 @@
-// frontend/src/pages/Home.tsx
-import React from "react";
+// src/pages/Home.tsx
 import { Link } from "react-router-dom";
+import Layout from "../components/Layout";
 
 const Home = () => {
   return (
-    <div className="text-center py-20 px-4 max-w-3xl mx-auto">
-      <h2 className="text-4xl font-extrabold mb-4">Your Mental Health Matters</h2>
-      <p className="text-lg mb-6">
-        Connect with our AI-powered mental health companion for personalized support, mindfulness guidance, and emotional wellness tools available 24/7.
-      </p>
-      <div className="space-x-4">
-        <Link to="/dashboard" className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700">Start Your Journey</Link>
-        <a href="#support" className="border border-blue-600 text-blue-600 px-6 py-2 rounded hover:bg-blue-50">Learn More</a>
+    <Layout>
+      <div className="min-h-[80vh] flex flex-col items-center justify-center bg-gradient-to-b from-blue-50 to-white text-center px-4">
+        <h1 className="text-4xl font-bold text-blue-700 mb-4">Your Emotional Companion</h1>
+        <p className="text-gray-600 text-lg max-w-2xl mb-8">
+          MindCareAI is your gentle guide through emotional fog. Choose a tone that fits you best, and start your check-in anytime.
+        </p>
+        <div className="flex gap-4">
+          <Link to="/dashboard" className="bg-blue-600 text-white px-6 py-3 rounded-full hover:bg-blue-700 shadow">Explore Modes</Link>
+          <Link to="/chat" className="text-blue-600 font-medium hover:underline">Go Directly to Chat</Link>
+        </div>
       </div>
-    </div>
+    </Layout>
   );
 };
 

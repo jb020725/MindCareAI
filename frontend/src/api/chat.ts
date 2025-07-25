@@ -1,11 +1,30 @@
-// chat.ts
-import axios from "axios";
+// frontend/src/api/chat.ts
 
-const instance = axios.create({
-  baseURL: "http://localhost:8000", // adjust if deployed
-  headers: {
-    "Content-Type": "application/json",
-  },
-});
+interface ChatMessage {
+  sender: "user" | "assistant";
+  text: string;
+}
 
-export default instance;
+export async function sendMessage(
+  message: string,
+  history: ChatMessage[],
+  mode: string
+): Promise<string> {
+  try {
+    const res = await fetch("http://localhost:8000/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        message,
+        mode,
+        history,
+      }),
+    });
+
+    const data = await res.json();
+    return data.reply;
+  } catch (error) {
+    console.error("API call failed:", error);
+    return "Sorry, something went wrong.";
+  }
+}

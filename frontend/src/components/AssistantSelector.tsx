@@ -1,32 +1,27 @@
-// AssistantSelector.tsx
-interface Props {
-  mode: string;
-  setMode: (mode: string) => void;
-}
+// src/components/AvatarSelector.tsx
+import { Heart, Smile, Waves, Brain } from "lucide-react";
 
-const avatars = ["Listener", "Motivator", "Emotional Helper", "Stress Reliever"];
+const avatars = [
+  { id: "Listener", label: "Emotional Helper", icon: <Heart className="text-pink-500" /> },
+  { id: "Motivator", label: "Motivational Talk", icon: <Smile className="text-orange-400" /> },
+  { id: "Mindfulness Coach", label: "Mindfulness Coach", icon: <Brain className="text-purple-500" /> },
+  { id: "Stress Reliever", label: "Stress Relief", icon: <Waves className="text-blue-400" /> },
+];
 
-const AssistantSelector = ({ mode, setMode }: Props) => {
+const AvatarSelector = () => {
   return (
-    <div className="mb-4">
-      <p className="mb-2 text-sm text-gray-600">Choose Assistant Mode:</p>
-      <div className="flex flex-wrap gap-2">
+    <div className="p-4">
+      <h2 className="text-lg font-semibold mb-4 text-blue-700">Choose Your Mode</h2>
+      <div className="space-y-3">
         {avatars.map((avatar) => (
-          <button
-            key={avatar}
-            onClick={() => setMode(avatar)}
-            className={`px-3 py-1 rounded-full text-sm border ${
-              mode === avatar
-                ? "bg-indigo-600 text-white border-indigo-600"
-                : "bg-white text-gray-700 border-gray-300 hover:border-indigo-300"
-            }`}
-          >
-            {avatar}
-          </button>
+          <div key={avatar.id} className="flex items-center gap-3 p-2 rounded-lg text-gray-700 bg-blue-50 hover:bg-blue-100 cursor-pointer">
+            {avatar.icon}
+            <span className="font-medium">{avatar.label}</span>
+          </div>
         ))}
       </div>
     </div>
   );
 };
 
-export default AssistantSelector;
+export default AvatarSelector;

@@ -1,49 +1,104 @@
-// frontend/src/pages/Chat.tsx
-import React, { useState } from "react";
+// src/pages/Chat.tsx
+import { useState, useEffect, useRef } from "react";
+import { Bot, Send } from "lucide-react";
+import Layout from "../components/Layout";
+import AvatarSelector from "../components/AvatarSelector";
+import { useSearchParams } from "react-router-dom";
+
+interface ChatMessage {
+  sender: "user" | "assistant";
+  text: string;
+}
 
 const Chat = () => {
-  const [message, setMessage] = useState("");
-  const [history, setHistory] = useState<string[]>([]);
+  const [params] = useSearchParams();
+  const initialMode = params.get("mode") || "Listener";
+
+  const [selectedMode, setSelectedMode] = useState(initialMode);
+  const [input, setInput] = useState("");
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [loading, setLoading] = useState(false);
+  const chatEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
   const sendMessage = async () => {
-    if (!message.trim()) return;
+    if (!input.trim()) return;
 
-    const userMsg = message;
-    setHistory((prev) => [...prev, `🧑: ${userMsg}`]);
-    setMessage("");
+    const userMessage: ChatMessage = { sender: "user", text: input };
+    setMessages(prev => [...prev, userMessage]);
+    setInput("");
     setLoading(true);
 
-    const res = await fetch("http://localhost:8000/chat", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: userMsg }),
-    });
-    const data = await res.json();
-    setHistory((prev) => [...prev, `🤖: ${data.response}`]);
-    setLoading(false);
+    try {
+      const res = await fetch("http://localhost:8000/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          message: input,
+          mode: selectedMode,
+          history: messages,
+        }),
+      });
+
+      const data = await res.json();
+      const botReply: ChatMessage = { sender: "assistant", text: data.reply };
+      setMessages(prev => [...prev, botReply]);
+    } catch (err) {
+      setMessages(prev => [
+        ...prev,
+        { sender: "assistant", text: "⚠️ Gemini is not responding. Please try again." },
+      ]);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <div className="max-w-3xl mx-auto py-10 px-4">
-      <h2 className="text-2xl font-bold mb-4">Chat with your AI Companion</h2>
-      <div className="border rounded p-4 bg-white shadow mb-4 h-[400px] overflow-y-auto">
-        {history.map((msg, idx) => (
-          <p key={idx} className="mb-2 whitespace-pre-wrap">{msg}</p>
-        ))}
-        {loading && <p>🤖: typing...</p>}
+    <Layout sidebar={<AvatarSelector />}>
+      <div className="flex flex-col h-screen">
+        <div className="p-4 border-b bg-white shadow-sm flex items-center gap-3">
+          <Bot className="text-blue-600" />
+          <h1 className="text-xl font-semibold">MindCare Assistant</h1>
+          <span className="ml-auto text-sm text-gray-500">Mode: {selectedMode}</span>
+        </div>
+
+        <div className="flex-1 overflow-y-auto px-4 py-6 space-y-4 bg-gradient-to-b from-white to-blue-50">
+          {messages.map((msg, i) => (
+            <div
+              key={i}
+              className={`max-w-xl px-4 py-3 rounded-xl shadow-sm ${
+                msg.sender === "user"
+                  ? "ml-auto bg-blue-100 text-right"
+                  : "mr-auto bg-white border"
+              }`}
+            >
+              <p className="whitespace-pre-wrap">{msg.text}</p>
+            </div>
+          ))}
+          {loading && <div className="text-sm text-gray-500">MindCare is typing...</div>}
+          <div ref={chatEndRef} />
+        </div>
+
+        <div className="border-t bg-white px-4 py-3 flex gap-2">
+          <input
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+            placeholder="Type a message..."
+            className="flex-1 px-4 py-2 border rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <button
+            onClick={sendMessage}
+            className="bg-blue-600 text-white px-4 py-2 rounded-full hover:bg-blue-700"
+          >
+            <Send className="w-4 h-4" />
+          </button>
+        </div>
       </div>
-      <div className="flex gap-2">
-        <input
-          className="flex-1 border px-4 py-2 rounded shadow"
-          placeholder="Type a message..."
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && sendMessage()}
-        />
-        <button onClick={sendMessage} className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Send</button>
-      </div>
-    </div>
+    </Layout>
   );
 };
 
