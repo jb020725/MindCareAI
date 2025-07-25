@@ -1,8 +1,7 @@
-// src/App.tsx
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Chat from "./pages/Chat";
 import Home from "./pages/Home";
 import Dashboard from "./pages/Dashboard";
+import Chat from "./pages/Chat";
 
 function App() {
   return (
