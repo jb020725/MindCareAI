@@ -2,9 +2,13 @@
 import { Link } from "react-router-dom";
 import Layout from "../components/Layout";
 
-const Home = () => {
+interface HomeProps {
+  sidebar: React.ReactNode;
+}
+
+const Home = ({ sidebar }: HomeProps) => {
   return (
-    <Layout sidebar={<></>}>
+    <Layout sidebar={sidebar}>
       <div className="min-h-[80vh] flex flex-col items-center justify-center bg-gradient-to-b from-blue-50 to-white text-center px-4">
         <h1 className="text-4xl font-bold text-blue-700 mb-4">Your Emotional Companion</h1>
         <p className="text-gray-600 text-lg max-w-2xl mb-8">

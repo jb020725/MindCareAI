@@ -2,6 +2,10 @@
 import { Link } from "react-router-dom";
 import Layout from "../components/Layout";
 
+interface DashboardProps {
+  sidebar: React.ReactNode;
+}
+
 const modes = [
   {
     id: "Listener",
@@ -29,9 +33,9 @@ const modes = [
   },
 ];
 
-const Dashboard = () => {
+const Dashboard = ({ sidebar }: DashboardProps) => {
   return (
-    <Layout sidebar={<></>}>
+    <Layout sidebar={sidebar}>
       <div className="py-12 px-6 bg-gray-50">
         <h1 className="text-3xl font-bold text-center text-gray-800 mb-2">Welcome to Your Safe Space</h1>
         <p className="text-center text-gray-500 mb-10 max-w-2xl mx-auto">
