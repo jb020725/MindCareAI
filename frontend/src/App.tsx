@@ -1,19 +1,19 @@
 // src/App.tsx
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Chat from "./pages/Chat";
 import Home from "./pages/Home";
 import Dashboard from "./pages/Dashboard";
-import Chat from "./pages/Chat";
 
-const App = () => {
+function App() {
   return (
-    <BrowserRouter>
+    <Router>
       <Routes>
         <Route path="/" element={<Home sidebar={null} />} />
         <Route path="/dashboard" element={<Dashboard sidebar={null} />} />
         <Route path="/chat" element={<Chat />} />
       </Routes>
-    </BrowserRouter>
+    </Router>
   );
-};
+}
 
 export default App;
