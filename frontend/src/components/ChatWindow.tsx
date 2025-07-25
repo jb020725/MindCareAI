@@ -1,3 +1,4 @@
+// src/components/ChatWindow.tsx
 import { useEffect, useRef } from "react";
 
 interface ChatMessage {
@@ -10,7 +11,7 @@ interface ChatWindowProps {
   loading: boolean;
 }
 
-const ChatWindow: React.FC<ChatWindowProps> = ({ messages, loading }) => {
+const ChatWindow = ({ messages, loading }: ChatWindowProps) => {
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
