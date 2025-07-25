@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import Layout from "../components/Layout";
 
 interface DashboardProps {
-  sidebar: React.ReactNode;
+  sidebar?: React.ReactNode;
 }
 
 const modes = [
@@ -33,7 +33,7 @@ const modes = [
   },
 ];
 
-const Dashboard = ({ sidebar }: DashboardProps) => {
+const Dashboard = ({ sidebar = null }: DashboardProps) => {
   return (
     <Layout sidebar={sidebar}>
       <div className="py-12 px-6 bg-gray-50">

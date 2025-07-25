@@ -3,10 +3,10 @@ import { Link } from "react-router-dom";
 import Layout from "../components/Layout";
 
 interface HomeProps {
-  sidebar: React.ReactNode;
+  sidebar?: React.ReactNode;
 }
 
-const Home = ({ sidebar }: HomeProps) => {
+const Home = ({ sidebar = null }: HomeProps) => {
   return (
     <Layout sidebar={sidebar}>
       <div className="min-h-[80vh] flex flex-col items-center justify-center bg-gradient-to-b from-blue-50 to-white text-center px-4">
