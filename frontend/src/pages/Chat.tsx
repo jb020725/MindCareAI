@@ -1,10 +1,9 @@
-// src/pages/Chat.tsx
 import { useState, useEffect, useRef } from "react";
 import { Bot, Send } from "lucide-react";
 import Layout from "../components/Layout";
 import AvatarSelector from "../components/AvatarSelector";
 import { useSearchParams } from "react-router-dom";
-import { sendMessage as callGemini } from "../api/chat"; // ✅ ✅ ✅ FIX HERE
+import { sendMessage as callGemini } from "../api/chat";
 
 interface ChatMessage {
   sender: "user" | "assistant";
@@ -15,7 +14,7 @@ const Chat = () => {
   const [params] = useSearchParams();
   const initialMode = params.get("mode") || "Listener";
 
-  const [selectedMode, setSelectedMode] = useState(initialMode);
+  const [selectedMode] = useState(initialMode);
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [loading, setLoading] = useState(false);
@@ -50,12 +49,14 @@ const Chat = () => {
   return (
     <Layout sidebar={<AvatarSelector />}>
       <div className="flex flex-col h-screen">
+        {/* Header */}
         <div className="p-4 border-b bg-white shadow-sm flex items-center gap-3">
           <Bot className="text-blue-600" />
           <h1 className="text-xl font-semibold">MindCare Assistant</h1>
           <span className="ml-auto text-sm text-gray-500">Mode: {selectedMode}</span>
         </div>
 
+        {/* Messages */}
         <div className="flex-1 overflow-y-auto px-4 py-6 space-y-4 bg-gradient-to-b from-white to-blue-50">
           {messages.map((msg, i) => (
             <div
@@ -73,6 +74,7 @@ const Chat = () => {
           <div ref={chatEndRef} />
         </div>
 
+        {/* Input */}
         <div className="border-t bg-white px-4 py-3 flex gap-2">
           <input
             value={input}

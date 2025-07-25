@@ -1,4 +1,3 @@
-// src/pages/Home.tsx
 import { Link } from "react-router-dom";
 import Layout from "../components/Layout";
 
@@ -11,8 +10,18 @@ const Home = () => {
           MindCareAI is your gentle guide through emotional fog. Choose a tone that fits you best, and start your check-in anytime.
         </p>
         <div className="flex gap-4">
-          <Link to="/dashboard" className="bg-blue-600 text-white px-6 py-3 rounded-full hover:bg-blue-700 shadow">Explore Modes</Link>
-          <Link to="/chat" className="text-blue-600 font-medium hover:underline">Go Directly to Chat</Link>
+          <Link
+            to="/dashboard"
+            className="bg-blue-600 text-white px-6 py-3 rounded-full hover:bg-blue-700 shadow"
+          >
+            Explore Modes
+          </Link>
+          <Link
+            to="/chat"
+            className="text-blue-600 font-medium hover:underline"
+          >
+            Go Directly to Chat
+          </Link>
         </div>
       </div>
     </Layout>
