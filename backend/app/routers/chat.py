@@ -1,16 +1,20 @@
-
-
+# chat.py
 from fastapi import APIRouter, Request
-from app.services.gemini_service import get_gemini_response
+from pydantic import BaseModel
+from app.services.gemini_service import ask_gemini
 
 router = APIRouter()
 
-@router.post("/")
-async def chat(request: Request):
-    data = await request.json()
-    user_message = data.get("message")
+class ChatRequest(BaseModel):
+    message: str
+    mode: str
+    history: list
 
-    # sync call now
-    reply = get_gemini_response(user_message)
-
-    return {"response": reply}
+@router.post("/chat")
+async def chat_endpoint(payload: ChatRequest):
+    reply = await ask_gemini(
+        message=payload.message,
+        mode=payload.mode,
+        history=payload.history
+    )
+    return {"reply": reply}
