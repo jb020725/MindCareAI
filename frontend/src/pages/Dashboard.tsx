@@ -30,7 +30,7 @@ const modes = [
 
 const Dashboard = () => {
   return (
-    <Layout>
+    <Layout sidebar={<></>}>
       <div className="py-12 px-6 bg-gray-50 min-h-[calc(100vh-4rem)]">
         <h1 className="text-3xl font-bold text-center text-gray-800 mb-2">Welcome to Your Safe Space</h1>
         <p className="text-center text-gray-500 mb-10 max-w-2xl mx-auto">
