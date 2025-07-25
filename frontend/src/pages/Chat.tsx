@@ -4,6 +4,7 @@ import { Bot, Send } from "lucide-react";
 import Layout from "../components/Layout";
 import AvatarSelector from "../components/AvatarSelector";
 import { useSearchParams } from "react-router-dom";
+import { sendMessage as callGemini } from "../api/chat"; // ✅ ✅ ✅ FIX HERE
 
 interface ChatMessage {
   sender: "user" | "assistant";
@@ -33,18 +34,8 @@ const Chat = () => {
     setLoading(true);
 
     try {
-      const res = await fetch("http://localhost:8000/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          message: input,
-          mode: selectedMode,
-          history: messages,
-        }),
-      });
-
-      const data = await res.json();
-      const botReply: ChatMessage = { sender: "assistant", text: data.reply };
+      const reply = await callGemini(input, messages, selectedMode);
+      const botReply: ChatMessage = { sender: "assistant", text: reply };
       setMessages(prev => [...prev, botReply]);
     } catch (err) {
       setMessages(prev => [
