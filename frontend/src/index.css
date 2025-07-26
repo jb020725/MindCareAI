@@ -2,10 +2,25 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Optional global overrides */
-html,
 body {
-  margin: 0;
-  padding: 0;
-  font-family: 'Inter', sans-serif;
+  @apply bg-white text-gray-800;
+}
+
+.message {
+  @apply max-w-[80%] px-4 py-2 rounded-2xl my-2 text-base leading-relaxed shadow-sm;
+}
+
+.user {
+  @apply ml-auto bg-blue-600 text-white;
+}
+
+.assistant {
+  @apply mr-auto bg-gray-100 text-gray-900;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .message {
+    @apply max-w-[90%] text-sm;
+  }
 }

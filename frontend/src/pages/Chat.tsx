@@ -1,8 +1,6 @@
 import { useState, useEffect, useRef } from "react";
-import { Bot, Send } from "lucide-react";
-import Layout from "../components/Layout";
-import AvatarSelector from "../components/AvatarSelector";
-import { useSearchParams } from "react-router-dom";
+import ChatBubble from "../components/ChatBubble";
+import Sidebar from "../components/Sidebar";
 import { sendMessage as callGemini } from "../api/chat";
 
 interface ChatMessage {
@@ -11,10 +9,7 @@ interface ChatMessage {
 }
 
 const Chat = () => {
-  const [params] = useSearchParams();
-  const initialMode = params.get("mode") || "Listener";
-
-  const [selectedMode] = useState(initialMode);
+  const [selectedMode, setSelectedMode] = useState("MindCare");
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [loading, setLoading] = useState(false);
@@ -24,22 +19,31 @@ const Chat = () => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  useEffect(() => {
+    // Welcome message from assistant
+    const welcome: ChatMessage = {
+      sender: "assistant",
+      text: "👋 Hello there. How are you feeling today?",
+    };
+    setMessages([welcome]);
+  }, []);
+
   const sendMessage = async () => {
     if (!input.trim()) return;
 
     const userMessage: ChatMessage = { sender: "user", text: input };
-    setMessages(prev => [...prev, userMessage]);
+    setMessages((prev) => [...prev, userMessage]);
     setInput("");
     setLoading(true);
 
     try {
       const reply = await callGemini(input, messages, selectedMode);
       const botReply: ChatMessage = { sender: "assistant", text: reply };
-      setMessages(prev => [...prev, botReply]);
+      setMessages((prev) => [...prev, botReply]);
     } catch (err) {
-      setMessages(prev => [
+      setMessages((prev) => [
         ...prev,
-        { sender: "assistant", text: "⚠️ Gemini is not responding. Please try again." },
+        { sender: "assistant", text: "⚠️ Gemini is not responding." },
       ]);
     } finally {
       setLoading(false);
@@ -47,35 +51,28 @@ const Chat = () => {
   };
 
   return (
-    <Layout sidebar={<AvatarSelector />}>
-      <div className="flex flex-col h-screen">
-        {/* Header */}
-        <div className="p-4 border-b bg-white shadow-sm flex items-center gap-3">
-          <Bot className="text-blue-600" />
-          <h1 className="text-xl font-semibold">MindCare Assistant</h1>
-          <span className="ml-auto text-sm text-gray-500">Mode: {selectedMode}</span>
-        </div>
+    <div className="flex h-screen bg-white text-gray-800">
+      <Sidebar selected={selectedMode} onSelect={setSelectedMode} />
 
-        {/* Messages */}
-        <div className="flex-1 overflow-y-auto px-4 py-6 space-y-4 bg-gradient-to-b from-white to-blue-50">
+      <div className="flex flex-col flex-1">
+        <header className="p-4 border-b shadow-sm flex items-center justify-between bg-white">
+          <h1 className="text-xl font-bold text-blue-700">MindCareAI</h1>
+          <span className="text-sm text-gray-500">Mode: {selectedMode}</span>
+        </header>
+
+        <main className="flex-1 overflow-y-auto px-4 py-6 bg-gradient-to-b from-white to-blue-50 custom-scrollbar">
           {messages.map((msg, i) => (
-            <div
-              key={i}
-              className={`max-w-xl px-4 py-3 rounded-xl shadow-sm ${
-                msg.sender === "user"
-                  ? "ml-auto bg-blue-100 text-right"
-                  : "mr-auto bg-white border"
-              }`}
-            >
-              <p className="whitespace-pre-wrap">{msg.text}</p>
-            </div>
+            <ChatBubble key={i} sender={msg.sender} text={msg.text} />
           ))}
-          {loading && <div className="text-sm text-gray-500">MindCare is typing...</div>}
+          {loading && (
+            <div className="typing-indicator text-sm text-gray-500">
+              Typing<span className="dots">...</span>
+            </div>
+          )}
           <div ref={chatEndRef} />
-        </div>
+        </main>
 
-        {/* Input */}
-        <div className="border-t bg-white px-4 py-3 flex gap-2">
+        <footer className="border-t bg-white px-4 py-3 flex gap-2">
           <input
             value={input}
             onChange={(e) => setInput(e.target.value)}
@@ -87,11 +84,11 @@ const Chat = () => {
             onClick={sendMessage}
             className="bg-blue-600 text-white px-4 py-2 rounded-full hover:bg-blue-700"
           >
-            <Send className="w-4 h-4" />
+            Send
           </button>
-        </div>
+        </footer>
       </div>
-    </Layout>
+    </div>
   );
 };
 

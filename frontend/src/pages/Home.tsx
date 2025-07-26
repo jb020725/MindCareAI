@@ -1,23 +1,24 @@
+
 // src/pages/Home.tsx
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import Layout from "../components/Layout";
 
-interface HomeProps {
-  sidebar?: React.ReactNode;
-}
+const Home = () => {
+  const navigate = useNavigate();
 
-const Home = ({ sidebar = null }: HomeProps) => {
   return (
-    <Layout sidebar={sidebar}>
-      <div className="min-h-[80vh] flex flex-col items-center justify-center bg-gradient-to-b from-blue-50 to-white text-center px-4">
-        <h1 className="text-4xl font-bold text-blue-700 mb-4">Your Emotional Companion</h1>
-        <p className="text-gray-600 text-lg max-w-2xl mb-8">
-          MindCareAI is your gentle guide through emotional fog. Choose a tone that fits you best, and start your check-in anytime.
+    <Layout>
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-blue-50 to-white text-center px-6">
+        <h1 className="text-4xl font-bold text-blue-700 mb-4">Welcome to MindCareAI</h1>
+        <p className="text-gray-600 text-lg max-w-xl mb-8">
+          Your gentle AI companion for emotional check-ins. Choose a helpful tone — whether you need motivation, calm, or clarity — and let’s chat it out.
         </p>
-        <div className="flex gap-4">
-          <Link to="/dashboard" className="bg-blue-600 text-white px-6 py-3 rounded-full hover:bg-blue-700 shadow">Explore Modes</Link>
-          <Link to="/chat" className="text-blue-600 font-medium hover:underline">Go Directly to Chat</Link>
-        </div>
+        <button
+          onClick={() => navigate("/chat")}
+          className="bg-blue-600 text-white px-6 py-3 rounded-full hover:bg-blue-700 shadow-lg text-lg transition"
+        >
+          Let’s Chat It Out
+        </button>
       </div>
     </Layout>
   );

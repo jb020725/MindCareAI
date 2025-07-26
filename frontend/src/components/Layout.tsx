@@ -1,17 +1,14 @@
-// src/components/Layout.tsx
-import type { ReactNode } from "react";
+import React from "react";
 
-interface Props {
-  sidebar?: ReactNode; // ✅ make it optional
-  children: ReactNode;
+interface LayoutProps {
+  children: React.ReactNode;
+  sidebar?: React.ReactNode;
 }
 
-const Layout = ({ sidebar, children }: Props) => {
+const Layout: React.FC<LayoutProps> = ({ children, sidebar }) => {
   return (
-    <div className="flex h-screen">
-      {sidebar && (
-        <aside className="w-60 bg-white border-r shadow-sm">{sidebar}</aside>
-      )}
+    <div className="flex h-screen overflow-hidden">
+      {sidebar && <div className="w-64 border-r bg-white">{sidebar}</div>}
       <main className="flex-1">{children}</main>
     </div>
   );

@@ -1,4 +1,4 @@
-# gemini_service.py
+# app/services/gemini_service.py
 import os
 from dotenv import load_dotenv
 import google.generativeai as genai
@@ -9,23 +9,24 @@ genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 MODEL = "models/gemini-1.5-pro-latest"
 
 PERSONALITY_PROMPTS = {
-    "Listener": "You are a calm and supportive assistant who helps people reflect gently on their thoughts. Ask one thoughtful question at a time and avoid assumptions.",
-    "Motivator": "You are an encouraging motivator who helps people believe in themselves. Use upbeat and energetic tone. Give supportive feedback and challenges.",
-    "Emotional Helper": "You gently help users understand their emotional triggers and guide them to regulate their state through introspection and awareness.",
-    "Stress Reliever": "You help people feel lighter. Use humor, empathy, breathing guidance, and perspective-shifting thoughts to help relieve pressure.",
+    "MindCare": "You are a calm, emotionally aware assistant who helps users understand and navigate their feelings gently and clearly.",
+    "Motivator": "You are an encouraging motivator who helps people believe in themselves. Use an upbeat and energetic tone with supportive feedback.",
+    "StressReliever": "You help people feel lighter. Use empathy, breathing guidance, light humor, and calming language to relieve pressure.",
 }
 
-async def ask_gemini(message: str, mode: str, history: list):
-    prompt_parts = [PERSONALITY_PROMPTS.get(mode, PERSONALITY_PROMPTS["Listener"])]
-    
-    for item in history[-6:]:  # Keep last few messages only
+def ask_gemini(message: str, mode: str, history: list) -> str:
+    system_prompt = PERSONALITY_PROMPTS.get(mode, PERSONALITY_PROMPTS["MindCare"])
+    prompt_parts = [system_prompt]
+
+    for item in history[-6:]:  # limit to last 6 messages
         role = item["sender"]
         prefix = "User:" if role == "user" else "Assistant:"
         prompt_parts.append(f"{prefix} {item['text']}")
 
     prompt_parts.append(f"User: {message}")
-    prompt = "\n".join(prompt_parts)
+    full_prompt = "\n".join(prompt_parts)
 
     model = genai.GenerativeModel(model_name=MODEL)
-    response = model.generate_content(prompt)
+    response = model.generate_content(full_prompt)
+
     return response.text.strip()
