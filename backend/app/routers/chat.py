@@ -1,14 +1,19 @@
-# chat.py
-from fastapi import APIRouter, Request
+# backend/app/routers/chat.py
+from fastapi import APIRouter
 from pydantic import BaseModel
+from typing import List
 from backend.app.services.gemini_service import ask_gemini
 
 router = APIRouter()
 
+class Message(BaseModel):
+    sender: str
+    text: str
+
 class ChatRequest(BaseModel):
     message: str
     mode: str
-    history: list
+    history: List[Message]
 
 @router.post("/chat")
 async def chat_endpoint(payload: ChatRequest):
@@ -17,7 +22,7 @@ async def chat_endpoint(payload: ChatRequest):
         reply = ask_gemini(
             message=payload.message,
             mode=payload.mode,
-            history=payload.history
+            history=[msg.dict() for msg in payload.history]
         )
         return {"reply": reply}
     except Exception as e:

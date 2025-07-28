@@ -1,32 +1,36 @@
 // src/components/Sidebar.tsx
-import React from "react";
-
 interface SidebarProps {
-  selected: string;
-  onSelect: (mode: string) => void;
+  selectedMode: string;
+  setSelectedMode: (mode: "MindCare" | "Motivator" | "StressRelief") => void;
 }
 
-const modes = ["MindCare Assistant", "Motivator", "Stress Reliever"];
+const Sidebar = ({ selectedMode, setSelectedMode }: SidebarProps) => {
+  const modes: { id: "MindCare" | "Motivator" | "StressRelief"; label: string }[] = [
+    { id: "MindCare", label: "MindCare" },
+    { id: "Motivator", label: "Motivator" },
+    { id: "StressRelief", label: "Stress Relief" },
+  ];
 
-const Sidebar: React.FC<SidebarProps> = ({ selected, onSelect }) => {
   return (
-    <aside className="w-56 bg-white border-r p-4 flex flex-col shadow-sm">
-      <h2 className="text-lg font-semibold mb-4 text-gray-700">Choose Mode</h2>
-      {modes.map((mode) => (
-        <button
-          key={mode}
-          onClick={() => onSelect(mode)}
-          className={`px-4 py-2 mb-2 rounded-md text-left transition-all duration-200
-            ${
-              selected === mode
-                ? "bg-blue-600 text-white shadow"
-                : "bg-blue-100 text-blue-800 hover:bg-blue-200"
-            }`}
-        >
-          {mode}
-        </button>
-      ))}
-    </aside>
+    <div className="w-48 border-r bg-white p-4 shadow-md">
+      <h3 className="text-lg font-semibold mb-4 text-gray-700">Modes</h3>
+      <ul className="space-y-2">
+        {modes.map((mode) => (
+          <li key={mode.id}>
+            <button
+              onClick={() => setSelectedMode(mode.id)}
+              className={`w-full text-left px-4 py-2 rounded-md transition font-medium ${
+                selectedMode === mode.id
+                  ? "bg-blue-600 text-white shadow"
+                  : "text-gray-700 hover:bg-blue-100"
+              }`}
+            >
+              {mode.label}
+            </button>
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 };
 

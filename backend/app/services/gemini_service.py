@@ -18,7 +18,10 @@ def ask_gemini(message: str, mode: str, history: list) -> str:
     system_prompt = PERSONALITY_PROMPTS.get(mode, PERSONALITY_PROMPTS["MindCare"])
     prompt_parts = [system_prompt]
 
-    for item in history[-6:]:  # limit to last 6 messages
+    for item in history[-6:]:  # Only recent messages
+        if "text" not in item:
+            continue  # Avoid crashing if malformed
+
         role = item["sender"]
         prefix = "User:" if role == "user" else "Assistant:"
         prompt_parts.append(f"{prefix} {item['text']}")
@@ -28,5 +31,4 @@ def ask_gemini(message: str, mode: str, history: list) -> str:
 
     model = genai.GenerativeModel(model_name=MODEL)
     response = model.generate_content(full_prompt)
-
     return response.text.strip()

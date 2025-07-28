@@ -1,92 +1,111 @@
-import { useState, useEffect, useRef } from "react";
-import ChatBubble from "../components/ChatBubble";
+// src/pages/Chat.tsx
+import { useEffect, useRef } from "react";
+import { useSearchParams } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
-import { sendMessage as callGemini } from "../api/chat";
+import ChatBubble from "../components/ChatBubble";
+import VoiceRecorder from "../components/VoiceRecorder";
+import { useChatLogic, type ChatMessage } from "../hooks/useChatLogic";
 
-interface ChatMessage {
-  sender: "user" | "assistant";
-  text: string;
-}
+type ModeKey = "MindCare" | "Motivator" | "StressRelief";
+
+const MODE_META: Record<ModeKey, { label: string; subtitle: string }> = {
+  MindCare: { label: "MindCare", subtitle: "Clarity & Balance" },
+  Motivator: { label: "Motivator", subtitle: "Energy & Drive" },
+  StressRelief: { label: "Stress Relief", subtitle: "Calm & Ease" },
+};
 
 const Chat = () => {
-  const [selectedMode, setSelectedMode] = useState("MindCare");
-  const [input, setInput] = useState("");
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [loading, setLoading] = useState(false);
-  const chatEndRef = useRef<HTMLDivElement>(null);
+  const [searchParams] = useSearchParams();
+  const urlMode = searchParams.get("mode");
+
+  const {
+    messages,
+    input,
+    setInput,
+    loading,
+    sendMessage,
+    selectedMode,
+    setSelectedMode,
+    addMessage,
+    handleAssistantReply,
+    setLoading,
+    playAudio,
+  } = useChatLogic();
+
+  const chatEndRef = useRef<HTMLDivElement | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
   useEffect(() => {
-    // Welcome message from assistant
-    const welcome: ChatMessage = {
-      sender: "assistant",
-      text: "👋 Hello there. How are you feeling today?",
-    };
-    setMessages([welcome]);
-  }, []);
+    inputRef.current?.focus();
+  }, [messages]);
 
-  const sendMessage = async () => {
-    if (!input.trim()) return;
-
-    const userMessage: ChatMessage = { sender: "user", text: input };
-    setMessages((prev) => [...prev, userMessage]);
-    setInput("");
-    setLoading(true);
-
-    try {
-      const reply = await callGemini(input, messages, selectedMode);
-      const botReply: ChatMessage = { sender: "assistant", text: reply };
-      setMessages((prev) => [...prev, botReply]);
-    } catch (err) {
-      setMessages((prev) => [
-        ...prev,
-        { sender: "assistant", text: "⚠️ Gemini is not responding." },
-      ]);
-    } finally {
-      setLoading(false);
+  useEffect(() => {
+    if (urlMode && ["MindCare", "Motivator", "StressRelief"].includes(urlMode)) {
+      setSelectedMode(urlMode as ModeKey);
     }
-  };
+  }, [urlMode]);
+
+  const modeInfo = MODE_META[selectedMode as ModeKey] ?? MODE_META["MindCare"];
 
   return (
-    <div className="flex h-screen bg-white text-gray-800">
-      <Sidebar selected={selectedMode} onSelect={setSelectedMode} />
+    <div className="flex h-screen overflow-hidden">
+      <Sidebar selectedMode={selectedMode} setSelectedMode={setSelectedMode} />
 
-      <div className="flex flex-col flex-1">
-        <header className="p-4 border-b shadow-sm flex items-center justify-between bg-white">
-          <h1 className="text-xl font-bold text-blue-700">MindCareAI</h1>
-          <span className="text-sm text-gray-500">Mode: {selectedMode}</span>
-        </header>
+      <div className="flex flex-col flex-1 bg-gradient-to-b from-white via-blue-50 to-white">
+        <div className="p-4 border-b border-gray-200 bg-white">
+          <h2 className="text-xl font-semibold text-gray-800">{modeInfo.label}</h2>
+          <p className="text-sm text-gray-500">{modeInfo.subtitle}</p>
+        </div>
 
-        <main className="flex-1 overflow-y-auto px-4 py-6 bg-gradient-to-b from-white to-blue-50 custom-scrollbar">
-          {messages.map((msg, i) => (
-            <ChatBubble key={i} sender={msg.sender} text={msg.text} />
+        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+          {messages.map((msg: ChatMessage, idx) => (
+            <ChatBubble
+              key={idx}
+              sender={msg.sender}
+              text={msg.text}
+              audio_url={msg.audio_url}
+              loading={loading && idx === messages.length - 1 && msg.sender === "assistant"}
+            />
           ))}
-          {loading && (
-            <div className="typing-indicator text-sm text-gray-500">
-              Typing<span className="dots">...</span>
-            </div>
-          )}
           <div ref={chatEndRef} />
-        </main>
+        </div>
 
-        <footer className="border-t bg-white px-4 py-3 flex gap-2">
+        <div className="p-4 border-t bg-white flex items-center gap-2">
           <input
+            ref={inputRef}
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && sendMessage()}
-            placeholder="Type a message..."
-            className="flex-1 px-4 py-2 border rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="Type your message..."
+            className="flex-1 px-4 py-2 border rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
           />
           <button
             onClick={sendMessage}
-            className="bg-blue-600 text-white px-4 py-2 rounded-full hover:bg-blue-700"
+            disabled={loading}
+            className="p-2 text-blue-600 hover:text-blue-800 disabled:opacity-50"
           >
-            Send
+            <svg
+              className="w-6 h-6 rotate-45"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M5 12h14M12 5l7 7-7 7" />
+            </svg>
           </button>
-        </footer>
+          <VoiceRecorder
+            selectedMode={selectedMode}
+            addMessage={addMessage}
+            handleAssistantReply={handleAssistantReply}
+            setLoading={setLoading}
+            playAudio={playAudio}
+          />
+        </div>
       </div>
     </div>
   );
