@@ -1,4 +1,3 @@
-// src/components/VoiceRecorder.tsx
 import { useState, useRef } from "react";
 import { ChatMessage } from "@/hooks/useChatLogic";
 
@@ -97,8 +96,27 @@ const VoiceRecorder = ({
 
   return (
     <>
-      {recording ? (
-        <div className="flex items-center gap-2">
+      {!recording && (
+        <button
+          onClick={startRecording}
+          className="p-2 text-gray-600 hover:text-blue-600"
+          title="Start recording"
+        >
+          <svg
+            className="w-6 h-6"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={2}
+            viewBox="0 0 24 24"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 18v-6m0 0V6m0 6h.01" />
+            <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2" />
+          </svg>
+        </button>
+      )}
+
+      {recording && (
+        <div className="flex items-center gap-2 mt-2 md:mt-0">
           <button
             onClick={stopAndSend}
             className="text-sm px-3 py-1 rounded-full bg-blue-100 text-blue-600 hover:bg-blue-200 transition"
@@ -112,14 +130,6 @@ const VoiceRecorder = ({
             Cancel
           </button>
         </div>
-      ) : (
-        <button
-          onClick={startRecording}
-          className="text-xl text-gray-700 hover:text-blue-600 transition focus:outline-none"
-          aria-label="Start voice input"
-        >
-          🎤
-        </button>
       )}
     </>
   );

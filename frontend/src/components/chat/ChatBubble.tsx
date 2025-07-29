@@ -152,7 +152,9 @@ const ChatBubble = ({ sender, text, audio_url, loading = false }: Props) => {
                     <ThumbsDown
                       className={cn(
                         "w-5 h-5",
-                        isDisliked ? "text-black dark:text-white" : "text-gray-400"
+                        isDisliked
+                          ? "text-black dark:text-white"
+                          : "text-gray-400"
                       )}
                       strokeWidth={2}
                     />
@@ -171,7 +173,10 @@ const ChatBubble = ({ sender, text, audio_url, loading = false }: Props) => {
                     {isSpeaking ? (
                       <Square className="w-5 h-5 text-red-500" strokeWidth={2} />
                     ) : (
-                      <Volume2 className="w-5 h-5 text-gray-500" strokeWidth={2} />
+                      <Volume2
+                        className="w-5 h-5 text-gray-500"
+                        strokeWidth={2}
+                      />
                     )}
                   </button>
                 </TooltipTrigger>
@@ -186,9 +191,15 @@ const ChatBubble = ({ sender, text, audio_url, loading = false }: Props) => {
                     className="hover:scale-110 transition"
                   >
                     {isCopied ? (
-                      <ClipboardCheck className="w-5 h-5 text-green-600" strokeWidth={2} />
+                      <ClipboardCheck
+                        className="w-5 h-5 text-green-600"
+                        strokeWidth={2}
+                      />
                     ) : (
-                      <Clipboard className="w-5 h-5 text-gray-500" strokeWidth={2} />
+                      <Clipboard
+                        className="w-5 h-5 text-gray-500"
+                        strokeWidth={2}
+                      />
                     )}
                   </button>
                 </TooltipTrigger>
