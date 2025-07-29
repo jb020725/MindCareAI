@@ -1,3 +1,7 @@
+# backend/app/services/tts_service.py
+# NOTE: Currently unused — reserved for future "Real Talk" voice playback
+
+
 import os
 from pathlib import Path
 from google.cloud import texttospeech

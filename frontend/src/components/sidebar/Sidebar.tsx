@@ -1,27 +1,30 @@
-import React from "react";
-
-interface AvatarSelectorProps {
-  selected: string;
-  onSelect: (mode: string) => void;
+// src/components/Sidebar.tsx
+interface SidebarProps {
+  selectedMode: string;
+  setSelectedMode: (mode: "MindCare" | "Motivator" | "StressRelief") => void;
+  onSelectDone?: () => void;
 }
 
 const modes = [
   { label: "MindCare Assistant", value: "MindCare", emoji: "🧠" },
   { label: "Motivator", value: "Motivator", emoji: "⚡" },
-  { label: "Stress Reliever", value: "StressReliever", emoji: "🌿" },
+  { label: "Stress Reliever", value: "StressRelief", emoji: "🌿" },
 ];
 
-const AvatarSelector: React.FC<AvatarSelectorProps> = ({ selected, onSelect }) => {
+const Sidebar = ({ selectedMode, setSelectedMode, onSelectDone }: SidebarProps) => {
   return (
-    <div className="flex flex-col gap-4 p-4">
-      <h2 className="text-xl font-semibold text-gray-800">Choose Your Assistant</h2>
+    <div className="p-4 w-64 bg-white h-full flex flex-col gap-6">
+      <h2 className="text-xl font-semibold text-gray-800">Choose Your Mode</h2>
       <div className="flex flex-col gap-3">
         {modes.map((mode) => {
-          const isSelected = selected === mode.value;
+          const isSelected = selectedMode === mode.value;
           return (
             <button
               key={mode.value}
-              onClick={() => onSelect(mode.value)}
+              onClick={() => {
+                setSelectedMode(mode.value as any);
+                onSelectDone?.();
+              }}
               aria-pressed={isSelected}
               className={`flex items-center gap-3 px-5 py-3 rounded-xl border text-left transition-all duration-200 shadow-sm text-base font-medium focus:outline-none focus:ring-2 focus:ring-blue-400 ${
                 isSelected
@@ -39,4 +42,4 @@ const AvatarSelector: React.FC<AvatarSelectorProps> = ({ selected, onSelect }) =
   );
 };
 
-export default AvatarSelector;
+export default Sidebar;

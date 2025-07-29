@@ -1,30 +1,28 @@
 # backend/app/routers/chat.py
 from fastapi import APIRouter
 from pydantic import BaseModel
-from typing import List
-from backend.app.services.gemini_service import ask_gemini
+from app.services.gemini_service import ask_gemini_async, cancel_session
 
 router = APIRouter()
-
-class Message(BaseModel):
-    sender: str
-    text: str
 
 class ChatRequest(BaseModel):
     message: str
     mode: str
-    history: List[Message]
+    history: list
+    session_id: str
 
 @router.post("/chat")
 async def chat_endpoint(payload: ChatRequest):
-    print(f"Received: {payload.dict()}")
-    try:
-        reply = ask_gemini(
-            message=payload.message,
-            mode=payload.mode,
-            history=[msg.dict() for msg in payload.history]
-        )
-        return {"reply": reply}
-    except Exception as e:
-        print(f"Error in /chat: {e}")
-        return {"reply": "Sorry, something went wrong."}
+    reply = await ask_gemini_async(
+        message=payload.message,
+        mode=payload.mode,
+        history=payload.history,
+        session_id=payload.session_id,
+    )
+    return {"reply": reply, "audio_url": None}
+
+@router.post("/cancel")
+async def cancel_endpoint(payload: dict):
+    session_id = payload.get("session_id")
+    await cancel_session(session_id)
+    return {"status": "cancelled"}

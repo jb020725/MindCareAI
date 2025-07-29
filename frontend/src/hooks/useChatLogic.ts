@@ -1,7 +1,7 @@
 // src/hooks/useChatLogic.ts
 import { useState, useRef } from "react";
-import { sendMessage as callGemini } from "../api/chat";
-import type { Message } from "../api/chat";
+import { sendMessage as callGemini, cancelSession } from "../api/chat";
+import { v4 as uuidv4 } from "uuid";
 
 export interface ChatMessage {
   sender: "user" | "assistant";
@@ -10,83 +10,105 @@ export interface ChatMessage {
 }
 
 export const useChatLogic = () => {
-  const [messages, setMessages] = useState<ChatMessage[]>([
-    {
-      sender: "assistant",
-      text: "👋 Hello there. How are you feeling today?",
-    },
-  ]);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const [selectedMode, setSelectedMode] = useState<"MindCare" | "Motivator" | "StressRelief">("MindCare");
+  const [selectedMode, _setSelectedMode] = useState("MindCare"); // 👈 wrapped setter
+  const sessionIdRef = useRef(uuidv4());
+  const wasCancelledRef = useRef(false);
 
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-
-  const playAudio = (url: string) => {
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
-    }
-    const audio = new Audio(url);
-    audioRef.current = audio;
-    audio.play();
-  };
-
-  const addMessage = (message: ChatMessage) => {
-    setMessages((prev) => [...prev, message]);
-  };
-
-  const handleAssistantReply = (reply: string, audio_url?: string) => {
-    addMessage({
-      sender: "assistant",
-      text: reply,
-      audio_url,
-    });
-    if (audio_url) playAudio(audio_url);
-  };
-
-  const formatHistory = (): Message[] => {
-    return messages.map(({ sender, text }) => ({ sender, text }));
+  const setSelectedMode = (newMode: string) => {
+    _setSelectedMode(newMode);
+    setMessages([]);
+    setInput("");
+    sessionIdRef.current = uuidv4();
   };
 
   const sendMessage = async () => {
     if (!input.trim()) return;
 
-    addMessage({ sender: "user", text: input });
+    const userMessage: ChatMessage = {
+      sender: "user",
+      text: input,
+    };
+
+    setMessages((prev) => [...prev, userMessage]);
     setInput("");
     setLoading(true);
+    wasCancelledRef.current = false;
 
     try {
-      const reply = await callGemini(input, selectedMode, formatHistory());
-      handleAssistantReply(reply);
+      const response = await callGemini(
+        input,
+        selectedMode,
+        messages,
+        sessionIdRef.current
+      );
+
+      if (!wasCancelledRef.current) {
+        const assistantMessage: ChatMessage = {
+          sender: "assistant",
+          text: response.reply,
+          audio_url: response.audio_url,
+        };
+
+        setMessages((prev) => [...prev, assistantMessage]);
+      }
     } catch (err) {
-      handleAssistantReply("⚠️ Failed to get a response.");
+      console.error("Gemini error:", err);
     } finally {
       setLoading(false);
+      sessionIdRef.current = uuidv4();
+      wasCancelledRef.current = false;
     }
   };
 
+  const stopAssistant = async () => {
+  try {
+    wasCancelledRef.current = true;
+    await cancelSession(sessionIdRef.current);
+
+    // Add visible UI feedback
+    const stoppedMessage: ChatMessage = {
+      sender: "assistant",
+      text: "⚠️ Response stopped.",
+    };
+    setMessages((prev) => [...prev, stoppedMessage]);
+  } catch (err) {
+    console.error("Cancel session failed:", err);
+  } finally {
+    setLoading(false);
+    sessionIdRef.current = uuidv4();
+  }
+};
+
+  const addMessage = (msg: ChatMessage) => {
+    setMessages((prev) => [...prev, msg]);
+  };
+
+  const handleAssistantReply = (msg: ChatMessage) => {
+    setMessages((prev) => [...prev, msg]);
+    setLoading(false);
+    sessionIdRef.current = uuidv4();
+  };
+
   const resetChat = () => {
-    setMessages([
-      {
-        sender: "assistant",
-        text: "👋 Hello there. How are you feeling today?",
-      },
-    ]);
     setInput("");
+    setMessages([]);
+    sessionIdRef.current = uuidv4();
   };
 
   return {
     messages,
     input,
-    loading,
-    selectedMode,
-    setSelectedMode,
     setInput,
+    loading,
     sendMessage,
+    stopAssistant,
+    selectedMode,
+    setSelectedMode, // 👈 returns custom setter
     addMessage,
     handleAssistantReply,
-    playAudio,
     setLoading,
     resetChat,
   };

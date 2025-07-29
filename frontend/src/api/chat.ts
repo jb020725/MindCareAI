@@ -1,34 +1,41 @@
-// frontend/src/api/chat.ts
-import axios from "axios";
+// src/api/chat.ts
 
-export interface Message {
-  sender: "user" | "assistant";
-  text: string;
-}
-
-interface ChatRequest {
-  message: string;
-  mode: string;
-  history: Message[];
-}
-
-interface ChatResponse {
-  reply: string;
-}
-
-const BASE_URL = "http://127.0.0.1:8000";
-
-export const sendMessage = async (
+export async function sendMessage(
   message: string,
   mode: string,
-  history: Message[]
-): Promise<string> => {
-  try {
-    const payload: ChatRequest = { message, mode, history };
-    const response = await axios.post<ChatResponse>(`${BASE_URL}/chat`, payload);
-    return response.data.reply;
-  } catch (error: any) {
-    console.error("API Error:", error?.response?.data || error.message);
-    throw new Error("Something went wrong while talking to the assistant.");
+  history: any[],
+  session_id: string
+) {
+  const res = await fetch("http://127.0.0.1:8000/chat", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      message,
+      mode,
+      history,
+      session_id,
+    }),
+  });
+
+  if (!res.ok) {
+    const errorText = await res.text();
+    console.error("Gemini sendMessage error:", errorText);
+    throw new Error("Failed to get response from Gemini");
   }
-};
+
+  return await res.json();
+}
+
+export async function cancelSession(session_id: string) {
+  const res = await fetch("http://127.0.0.1:8000/cancel", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ session_id }),
+  });
+
+  if (!res.ok) {
+    const errorText = await res.text();
+    console.error("Cancel session error:", errorText);
+    throw new Error("Failed to cancel session");
+  }
+}

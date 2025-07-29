@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { playAudioGlobal, stopCurrentAudio } from "../utils/audioController";
+import { playAudioGlobal, stopCurrentAudio } from "../../lib/audioController";
 
 interface Props {
   url: string;
