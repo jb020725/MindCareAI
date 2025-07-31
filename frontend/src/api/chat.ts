@@ -1,20 +1,10 @@
 // src/api/chat.ts
 
-export async function sendMessage(
-  message: string,
-  mode: string,
-  history: any[],
-  session_id: string
-) {
+export async function sendMessage(message: string, mode: string) {
   const res = await fetch("http://127.0.0.1:8000/chat", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      message,
-      mode,
-      history,
-      session_id,
-    }),
+    body: JSON.stringify({ message, mode }), // ✅ ONLY two fields
   });
 
   if (!res.ok) {

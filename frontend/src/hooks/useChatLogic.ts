@@ -8,57 +8,64 @@ export interface ChatMessage {
 }
 
 export const useChatLogic = () => {
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [messages, setMessages] = useState<ChatMessage[]>([]); // ✅ No assistant message on init
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [selectedMode, setSelectedMode] = useState<"MindCare" | "Motivator" | "StressRelief">("MindCare");
 
-  const addMessage = (msg: ChatMessage) => {
-    setMessages((prev) => [...prev, msg]);
+  const addMessage = (message: ChatMessage) => {
+    setMessages((prev) => [...prev, message]);
   };
 
   const resetChat = () => {
-    setMessages([]);
-  };
-
-  const handleAssistantReply = (msg: ChatMessage) => {
-    setMessages((prev) => [...prev, msg]);
+    setMessages([]); // ✅ No assistant message on reset either
+    setInput("");
+    setLoading(false);
   };
 
   const sendMessage = async () => {
     if (!input.trim()) return;
 
-    const userMsg: ChatMessage = { sender: "user", text: input };
-    setMessages((prev) => [...prev, userMsg]);
-    setInput("");
-    setLoading(true);
+    const userMessage: ChatMessage = { sender: "user", text: input };
+    addMessage(userMessage);
 
     try {
+      setLoading(true);
+
       const res = await fetch("http://127.0.0.1:8000/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: input, mode: selectedMode }),
+        body: JSON.stringify({
+          message: input,
+          mode: selectedMode,
+        }),
       });
+
+      if (!res.ok) {
+        throw new Error(`API Error: ${res.status}`);
+      }
 
       const data = await res.json();
 
-      const assistantMsg: ChatMessage = {
+      addMessage({
         sender: "assistant",
-        text: data.reply || "⚠️ No response from assistant",
+        text: data.reply,
         audio_url: data.audio_url,
-      };
-
-      setMessages((prev) => [...prev, assistantMsg]);
-    } catch (error) {
-      console.error("Chat error:", error);
-      setMessages((prev) => [...prev, { sender: "assistant", text: "⚠️ Something went wrong" }]);
+      });
+    } catch (err) {
+      console.error("❌ Error sending message:", err);
     } finally {
+      setInput("");
       setLoading(false);
     }
   };
 
+  const handleAssistantReply = (userInput: string) => {
+    setInput(userInput);
+    sendMessage();
+  };
+
   const stopAssistant = () => {
-    // Optional: implement session stop if backend supports it
     setLoading(false);
   };
 
@@ -67,13 +74,13 @@ export const useChatLogic = () => {
     input,
     setInput,
     loading,
-    sendMessage,
-    stopAssistant,
+    setLoading,
     selectedMode,
     setSelectedMode,
     addMessage,
+    sendMessage,
+    stopAssistant,
     handleAssistantReply,
-    setLoading,
     resetChat,
   };
 };

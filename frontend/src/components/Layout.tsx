@@ -10,7 +10,7 @@ const Layout: React.FC<LayoutProps> = ({ children, sidebar }) => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   return (
-    <div className="h-screen flex flex-col bg-gradient-to-b from-blue-50 to-white">
+    <div className="h-screen flex flex-col bg-[#f9f9f9]">
       {/* Top Bar (Mobile Toggle) */}
       {sidebar && (
         <div className="flex justify-between items-center p-4 border-b bg-white shadow-sm md:hidden">
@@ -80,7 +80,7 @@ const Layout: React.FC<LayoutProps> = ({ children, sidebar }) => {
             </div>
           )}
 
-          <div className="max-w-screen-md mx-auto relative">
+          <div className="max-w-screen-md mx-auto relative min-h-screen flex flex-col">
             {children}
           </div>
         </main>

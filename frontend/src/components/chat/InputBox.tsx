@@ -1,79 +1,92 @@
 // src/components/chat/InputBox.tsx
-import { useState, useRef } from "react";
-import { Mic, SendHorizontal } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { RefObject } from "react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+  TooltipProvider,
+} from "@/components/ui/tooltip";
+import { Send, Mic, Square } from "lucide-react";
 
 interface Props {
-  onSend: (message: string) => void;
-  onRecord: () => void;
-  isLoading?: boolean;
-  disableSend?: boolean;
+  input: string;
+  setInput: (value: string) => void;
+  onSend: () => void;
+  onMicClick: () => void;
+  onMicStop: () => void;
+  isRecording: boolean;
+  loading: boolean;
+  inputRef: RefObject<HTMLInputElement>;
 }
 
-const InputBox = ({ onSend, onRecord, isLoading = false, disableSend = false }: Props) => {
-  const [input, setInput] = useState("");
-  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
-
-  const handleSend = () => {
-    if (input.trim() === "") return;
-    onSend(input.trim());
-    setInput("");
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
-    }
+const InputBox = ({
+  input,
+  setInput,
+  onSend,
+  onMicClick,
+  onMicStop,
+  isRecording,
+  loading,
+  inputRef,
+}: Props) => {
+  const handleSubmit = () => {
+    if (!input.trim() || loading) return;
+    onSend();
   };
 
   return (
     <TooltipProvider>
-      <div className="flex items-end w-full border rounded-xl px-4 py-2 bg-white shadow-sm dark:bg-gray-900 dark:border-gray-700">
-        {/* Text input */}
-        <textarea
-          ref={textareaRef}
+      <div className="w-full max-w-3xl mx-auto px-4 pb-4 pt-2 flex items-center gap-2">
+        <Input
+          ref={inputRef}
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          onKeyDown={handleKeyDown}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !e.shiftKey) {
+              e.preventDefault();
+              handleSubmit();
+            }
+          }}
+          disabled={loading}
           placeholder="Type your message..."
-          rows={1}
-          className="flex-grow resize-none border-none bg-transparent text-sm focus:outline-none focus:ring-0 scrollbar-hide dark:text-white"
+          className="flex-1 h-14 text-base px-4 rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500 transition-colors"
         />
 
-        {/* Mic + Send Grouped */}
-        <div className="flex items-center gap-2 ml-2">
-          {/* Mic */}
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <button
-                onClick={onRecord}
-                className="text-gray-500 hover:text-blue-600 dark:hover:text-white transition"
-              >
-                <Mic className="w-5 h-5" />
-              </button>
-            </TooltipTrigger>
-            <TooltipContent>Record Voice</TooltipContent>
-          </Tooltip>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={isRecording ? onMicStop : onMicClick}
+              className="rounded-full p-2"
+              disabled={loading}
+            >
+              {isRecording ? <Square className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>{loading ? "Loading..." : isRecording ? "Stop Recording" : "Start Voice"}</p>
+          </TooltipContent>
+        </Tooltip>
 
-          {/* Send */}
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <button
-                onClick={handleSend}
-                disabled={disableSend || input.trim() === "" || isLoading}
-                className={cn(
-                  "text-gray-500 hover:text-blue-600 dark:hover:text-white transition",
-                  (disableSend || input.trim() === "") && "opacity-40 cursor-not-allowed"
-                )}
-              >
-                <SendHorizontal className="w-5 h-5" />
-              </button>
-            </TooltipTrigger>
-            <TooltipContent>Send</TooltipContent>
-          </Tooltip>
-        </div>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              onClick={handleSubmit}
+              disabled={loading || !input.trim()}
+              className="ml-1"
+              variant="default"
+            >
+              <Send className="w-4 h-4 mr-1" />
+              Send
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Send Message</p>
+          </TooltipContent>
+        </Tooltip>
       </div>
     </TooltipProvider>
   );

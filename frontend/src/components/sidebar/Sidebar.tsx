@@ -2,6 +2,7 @@
 interface SidebarProps {
   selectedMode: string;
   setSelectedMode: (mode: "MindCare" | "Motivator" | "StressRelief") => void;
+  resetChat: () => void;
   onSelectDone?: () => void;
 }
 
@@ -11,7 +12,7 @@ const modes = [
   { label: "Stress Reliever", value: "StressRelief", emoji: "🌿" },
 ];
 
-const Sidebar = ({ selectedMode, setSelectedMode, onSelectDone }: SidebarProps) => {
+const Sidebar = ({ selectedMode, setSelectedMode, resetChat, onSelectDone }: SidebarProps) => {
   return (
     <div className="p-4 w-64 bg-white h-full flex flex-col gap-6">
       <h2 className="text-xl font-semibold text-gray-800">Choose Your Mode</h2>
@@ -22,7 +23,10 @@ const Sidebar = ({ selectedMode, setSelectedMode, onSelectDone }: SidebarProps) 
             <button
               key={mode.value}
               onClick={() => {
-                setSelectedMode(mode.value as any);
+                if (!isSelected) {
+                  setSelectedMode(mode.value as any);
+                  resetChat(); // clear chat on mode change
+                }
                 onSelectDone?.();
               }}
               aria-pressed={isSelected}
